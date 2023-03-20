@@ -329,12 +329,27 @@ class ClickLTRData(Dataset):
     def __getitem__(self, q_i):
         clicks = self.logging_policy.gather_clicks(q_i)
         positions = self.logging_policy.query_positions(q_i)
-        ### BEGIN SOLUTION
+        ### BEGIN SOLUTION 
         topk = 20
-        tensor_clicks = torch.Tensor(clicks[:topk]).long()
-        tensor_positions = torch.Tensor(positions[:topk]).long()
+
+        indices = []
+        positions_topk = []
+        clicks_topk = []
+        features_topk = []
 
         features = self.split.query_feat(q_i)
-        tensor_features = torch.Tensor(features[:topk])
+
+        for i in range(len(positions)):
+            if positions[i] < topk:
+                indices.append(i)
+                positions_topk.append(positions[i])
+                clicks_topk.append(clicks[i])
+                features_topk.append(features[i])
+
+        tensor_positions = torch.Tensor(positions_topk).long()
+        tensor_clicks = torch.Tensor(clicks_topk).long()
+        tensor_features = torch.Tensor(features_topk)
+
+
         ### END SOLUTION
         return tensor_features, tensor_clicks, tensor_positions
